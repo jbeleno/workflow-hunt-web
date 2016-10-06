@@ -12,15 +12,15 @@ html, body {
 
 /******************************** Home Page **********************************/
 
-.home-btn-search{
+.home-btn-search, .results-btn-search{
     padding: 0.625em 0.75em;
 }
 
 .home-container{
-	margin-top: 8%;
+	margin-top: 10%;
 }
 
-.home-input-search{
+.home-input-search, .results-input-search{
     padding: 0.625em;
 }
 
@@ -37,4 +37,35 @@ html, body {
 	color: #666666;
 	font-size: 1.85em;
 	margin-bottom: 1em;
+}
+
+/******************************* Results Page ********************************/
+
+.results-container{
+    margin-top: 0.75em;
+}
+
+.results-logo{
+    height: 2.75em;
+    width: 2.75em;
+    margin-bottom: 0.5em;
+}
+
+.results-workflow{
+    margin-bottom: 1.5em;
+}
+
+.results-workflow-title{
+    display: block;
+    font-size: 1.125em;
+    font-weight: bold;
+}
+
+.results-workflow-url{
+    color: #4caf50;
+}
+
+.results-workflow-wfms{
+    font-size: 0.85em;
+    color: #757575;
 }
