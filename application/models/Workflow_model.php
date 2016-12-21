@@ -74,11 +74,18 @@ class Workflow_model extends CI_Model {
 	public $tags;
 
 	/**
-	 * Workflow API URL 
+	 * Workflows URL from API
 	 *
 	 * @var	string
 	 */
-	private $API_URL = "http://www.myexperiment.org/workflows.xml";
+	private $WORKFLOWS_URL = "http://www.myexperiment.org/workflows.xml";
+
+	/**
+	 * Workflow URL from API
+	 *
+	 * @var	string
+	 */
+	private $WORKFLOW_URL = "http://www.myexperiment.org/workflow.xml";
 
 	// --------------------------------------------------------------------
 
@@ -111,7 +118,7 @@ class Workflow_model extends CI_Model {
     	{
     		// Construct dinamically a URL until reach all the workflows
     		$PARAMS = "sort=id&num=".$wf_per_page."&page=".$page;
-    		$url = $API_URL."?".$PARAMS;
+    		$url = $this->WORKFLOWS_URL."?".$PARAMS;
 
     		// Request the content in XML format
     		$context  = stream_context_create(
@@ -123,8 +130,9 @@ class Workflow_model extends CI_Model {
     						);
 
 			$xml = file_get_contents($url, false, $context);
+			$xml = simplexml_load_string($xml);
 
-			if($xml = simplexml_load_string($xml))
+			if(!empty($xml))
 			{
 				// If the content is converted into XML, we'll create the array
 				// of workflow ids
@@ -144,6 +152,7 @@ class Workflow_model extends CI_Model {
 			}
 
     		$page++;
+    		print($page);
     	}
 
     	$this->db->insert_batch('workflow', $workflows);
@@ -177,7 +186,7 @@ class Workflow_model extends CI_Model {
 
     		// Construct dinamically a URL for each workflow
     		$PARAMS = "id=".$id_workflow."&elements=title,description,tags";
-    		$url = $API_URL."?".$PARAMS;
+    		$url = $this->WORKFLOW_URL."?".$PARAMS;
 
     		// Request the content in XML format
     		$context  = stream_context_create(
@@ -189,27 +198,42 @@ class Workflow_model extends CI_Model {
     						);
 
 			$xml = file_get_contents($url, false, $context);
+			$xml = simplexml_load_string($xml);
 
-			if($xml = simplexml_load_string($xml))
+			if(!empty($xml))
 			{
-				// If the content is converted into XML, we'll update the 
-				// workflow metadata
-				$workflows[] = array(
-										'id' => $id_workflow,
-										'title' => $xml->title,
-										'description' => $xml->description,
+				// Cleaning the metadata
+				$title = $xml->title;
+				$title = strip_tags($title);
+				$title = str_replace("\r\n", ' ', $title);
+				$title = str_replace('\"', '', $title);
+
+				$description = $xml->description;
+				$description = strip_tags($description);
+				$description = str_replace("\r\n", ' ', $description);
+				$description = str_replace('\"', '', $description);
+	
+				// Saving the metadata
+				$workflows/*[]*/ = array(
+										//'id' => $id_workflow,
+										'title' => $title,
+										'description' => $description,
 										'date_last_update' => date("Y-m-d H:i:s")
 									);
 
-				foreach ($xml->tags as $tag) 
+				// TODO: Remove this if the update_batch bug is resolved
+				$this->db->where('id', $id_workflow);
+				$this->db->update('workflow', $workflows);
+
+				foreach ($xml->tags->children() as $tag) 
 				{
 					// Insert tags that belong to workflows
-					if(!in_array($tag, $arr_tags))
+					if(!in_array(strval($tag), $arr_tags))
 					{
-						$arr_tags[] = $tag;
+						$arr_tags[] = strval($tag);
 						$tags[] = array(
 									'id' => $tag['id'], 
-									'name' => $tag,
+									'name' => strval($tag),
 									'date' => date("Y-m-d H:i:s")
 								  );
 					}
@@ -224,10 +248,11 @@ class Workflow_model extends CI_Model {
 			}
     	}
 
+    	// Storing the metadata in database
     	$this->db->insert_batch('tag', $tags);
     	$this->db->insert_batch('tag_wf', $tag_wf);
 
-    	$this->db->update_batch('workflow', $workflows, 'id');
+    	//$this->db->update_batch('workflow', $workflows, 'id');
     }
 
 }
