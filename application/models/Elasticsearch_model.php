@@ -67,7 +67,7 @@ class Elasticsearch_model extends CI_Model {
         // Load ElasticSearch API for PHP
         require APPPATH . 'third_party/vendor/autoload.php';
 
-        $this->client = ClientBuilder::create()->build();
+        $this->client = Elasticsearch\ClientBuilder::create()->build();
     }
 
     // --------------------------------------------------------------------
@@ -120,7 +120,7 @@ class Elasticsearch_model extends CI_Model {
 			];
 
 			// Indexing each workflow
-			$response = $client->index($params);
+			$response = $this->client->index($params);
     	}
 
     	return array('status' => 'OK');
@@ -154,14 +154,14 @@ class Elasticsearch_model extends CI_Model {
 		    		'more_like_this' => [
 			    		'fields' => ['title', 'description', 'tags'],
 			    		'like' => $query,
-			    		'min_term_freq': 1
+			    		'min_term_freq' => 1
 		    		]
 		    	]
 		    ]
 		];
 
 		// Searching workflows with metadata similar to the query
-		$response = $client->search($params);
+		$response = $this->client->search($params);
 
 		return array(
 			'status' => 'OK',
