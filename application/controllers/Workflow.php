@@ -9,14 +9,22 @@ class Workflow extends CI_Controller {
         $this->load->model('workflow_model');
     }
 
-	public function collect_metadata()
+	public function insert_workflow_metadata()
 	{
-		//$this->workflow_model->insert_workflow_ids(50);
-		$this->workflow_model->update_workflow_metadata();
+		$response = $this->workflow_model->insert_workflow_ids(50);
 
 		$this->output
 	         ->set_content_type('application/json')
-	         ->set_output(json_encode(array('status' => 'OK')));
+	         ->set_output(json_encode($response));
+	}
+
+	public function update_workflow_metadata()
+	{
+		$response = $this->workflow_model->update_workflow_metadata();
+
+		$this->output
+	         ->set_content_type('application/json')
+	         ->set_output(json_encode($response));
 	}
 
 }
