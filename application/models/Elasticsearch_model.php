@@ -1,0 +1,171 @@
+<?php
+/**
+ * WorkflowHunt
+ *
+ * A semantic search engine for scientific workflow repositories
+ *
+ * This content is released under the MIT License (MIT)
+ *
+ * Copyright (c) 2016 - 2017, Juan Sebastián Beleño Díaz
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ *
+ * @package	WorkflowHunt
+ * @author	Juan Sebastián Beleño Díaz
+ * @copyright	Copyright (c) 2016 - 2017, Juan Sebastián Beleño Díaz
+ * @license	http://opensource.org/licenses/MIT	MIT License
+ * @link	https://github.com/jbeleno
+ * @since	Version 1.0.0
+ * @filesource
+ */
+defined('BASEPATH') OR exit('No direct script access allowed');
+
+/**
+ * WorkflowHunt ElasticSearch Model
+ *
+ * @category	Models
+ * @author		Juan Sebastián Beleño Díaz
+ * @link		xxx
+ */
+class Elasticsearch_model extends CI_Model {
+
+	/**
+	 * ElasticSearch Client Instance
+	 *
+	 * @var	object
+	 */
+	private $client;
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Constructor
+	 *
+	 * @return	void
+	 */
+	public function __construct()
+    {
+        // Call the CI_Model constructor
+        parent::__construct();
+
+        // Load ElasticSearch API for PHP
+        require APPPATH . 'third_party/vendor/autoload.php';
+
+        $this->client = ClientBuilder::create()->build();
+    }
+
+    // --------------------------------------------------------------------
+
+    /**
+	 * Index Workflow Metadata in ElasticSearch
+	 *
+	 * The workflow metadata is indexed by ElasticSearch using the data 
+	 * stored in the database. The metadata comprises identificators, 
+	 * titles, descriptions and tags.
+	 *
+	 * @return	array
+	 */
+    public function index_metadata()
+    {
+    	$this->db->select('id, title, description');
+    	$query_workflows = $this->db->get('workflow');
+
+    	foreach ($query_workflows->result() as $workflow)
+    	{
+    		// Read the workflow metadata
+    		$workflow_id = $workflow->id;
+    		$workflow_title = $workflow->title;
+    		$workflow_description = $workflow->description;
+    		$workflow_tags = array();
+
+    		// Find the workflow tags
+    		$this->db->select('name');
+    		$this->db->where('workflow_id', $workflow_id);
+			$this->db->from('tag_wf');
+			$this->db->join('tag', 'tag.id = tag_wf.tag_id');
+			$query_tags = $this->db->get();
+
+			// Unify all the tags in an array
+			foreach ($query_tags->result() as $tag)
+			{
+				$workflow_tags[] = $tag->name;
+			}
+
+			// Seting up the metadata
+			$params = [
+			    'index' => 'underworld_index', // Hades' kingdom
+			    'type' => 'metadata',
+			    'id' => $workflow_id,
+			    'body' => [
+			    	'title' => $workflow_title,
+			    	'description' => $workflow->description,
+			    	'tags' => $workflow_tags
+			    ]
+			];
+
+			// Indexing each workflow
+			$response = $client->index($params);
+    	}
+
+    	return array('status' => 'OK');
+    }
+
+    // --------------------------------------------------------------------
+
+    /**
+	 * Search Workflows based on Metadata via ElasticSearch
+	 *
+	 * This is a keyword-based approach and ElasticSearch uses the workflow
+	 * metadata to return relevant results based on the query and the TF-IDF 
+	 * matrix. The workflow metadata comprises identificators, 
+	 * titles, descriptions and tags.
+	 *
+	 * @param	int	$query	User's query in the interface
+	 * @return	array
+	 */
+    public function search_in_metadata($query)
+    {
+    	// Seting up the query
+		$params = [
+		    'index' => 'underworld_index', // Hades' kingdom
+		    'type' => 'metadata',
+		    'body' => [
+		    	'query' => [
+		    		'more_like_this' => [
+			    		'fields' => ['title', 'description', 'tags'],
+			    		'like' => $query,
+			    		'min_term_freq': 1
+		    		]
+		    	]
+		    ]
+		];
+
+		// Searching workflows with metadata similar to the query
+		$response = $client->search($params);
+
+		return array(
+			'status' => 'OK',
+			'results' => $response
+		);
+    }
+
+}
+
+/* End of file Elasticsearch_model.php */
+/* Location: ./application/models/Elasticsearch_model.php */

@@ -106,7 +106,7 @@ class Workflow_model extends CI_Model {
 	 * Insert Workflow Identifiers in Database
 	 *
 	 * @param	int	$wf_per_page	Number of workflows per page in the API
-	 * @return	void
+	 * @return	array
 	 */
     public function insert_workflow_ids($wf_per_page = 50)
     {
@@ -156,6 +156,8 @@ class Workflow_model extends CI_Model {
     	}
 
     	$this->db->insert_batch('workflow', $workflows);
+
+    	return array('status' => 'OK');
     }
 
     // --------------------------------------------------------------------
@@ -167,7 +169,7 @@ class Workflow_model extends CI_Model {
 	 * database. Nevertheless, tags and workflow metadata are store in 
 	 * different tables. 
 	 *
-	 * @return	void
+	 * @return	array
 	 */
     public function update_workflow_metadata()
     {
@@ -252,7 +254,9 @@ class Workflow_model extends CI_Model {
     	$this->db->insert_batch('tag', $tags);
     	$this->db->insert_batch('tag_wf', $tag_wf);
 
-    	//$this->db->update_batch('workflow', $workflows, 'id');
+    	$this->db->update_batch('workflow', $workflows, 'id');
+
+    	return array('status' => 'OK');
     }
 
 }
