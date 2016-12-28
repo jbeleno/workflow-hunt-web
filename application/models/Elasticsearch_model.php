@@ -137,15 +137,19 @@ class Elasticsearch_model extends CI_Model {
 	 * titles, descriptions and tags.
 	 *
 	 * @param	int	$query	User's query in the interface
+	 * @param 	int $offset Offset of the results
+	 * @param 	int $size 	Size of the results
 	 * @return	array
 	 */
-    public function search_in_metadata($query)
+    public function search_in_metadata($query, $offset = 0, $size = 10)
     {
     	// Seting up the query
 		$params = [
 		    'index' => 'underworld_index', // Hades' kingdom
 		    'type' => 'metadata',
 		    'body' => [
+		    	'from' => $offset*$size,
+		    	'size' => $size,
 		    	'query' => [
 		    		'more_like_this' => [
 			    		'fields' => ['title', 'description', 'tags'],
