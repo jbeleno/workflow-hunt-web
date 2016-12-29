@@ -143,30 +143,45 @@ class Elasticsearch_model extends CI_Model {
 	 */
     public function search_in_metadata($query, $offset = 0, $size = 10)
     {
-    	// Seting up the query
-		$params = [
-		    'index' => 'underworld_index', // Hades' kingdom
-		    'type' => 'metadata',
-		    'body' => [
-		    	'from' => $offset*$size,
-		    	'size' => $size,
-		    	'query' => [
-		    		'more_like_this' => [
-			    		'fields' => ['title', 'description', 'tags'],
-			    		'like' => $query,
-			    		'min_term_freq' => 1
-		    		]
-		    	]
-		    ]
-		];
+    	if($query != '')
+    	{
+    		// Seting up the query
+			$params = [
+			    'index' => 'underworld_index', // Hades' kingdom
+			    'type' => 'metadata',
+			    'body' => [
+			    	'from' => $offset,
+			    	'size' => $size,
+			    	'query' => [
+			    		'more_like_this' => [
+				    		'fields' => ['title', 'description', 'tags'],
+				    		'like' => $query,
+				    		'min_term_freq' => 1
+			    		]
+			    	]
+			    ]
+			];
 
-		// Searching workflows with metadata similar to the query
-		$response = $this->client->search($params);
+			// Searching workflows with metadata similar to the query
+			$response = $this->client->search($params);
+			$total = $response['hits']['total'];
+			$results = $response['hits']['hits'];
 
-		return array(
-			'status' => 'OK',
-			'results' => $response
-		);
+			if($offset < $total)
+			{
+				return array(
+					'status' => 'OK',
+					'results' => $results,
+					'total' => $total
+				);
+			}
+    	}
+    	
+    	return array(
+					'status' => 'BAD',
+					'msg' => 'There are not results.'
+				);
+		
     }
 
 }

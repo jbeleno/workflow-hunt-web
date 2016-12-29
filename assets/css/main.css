@@ -69,3 +69,18 @@ html, body {
     font-size: 0.85em;
     color: #757575;
 }
+
+.page-item{
+    position: relative;
+    float: left;
+    padding: .275rem .75rem;
+    font-size: .875rem;
+    margin-left: -1px;
+    text-decoration: none;
+    background-color: #fff;
+    border: 1px solid #ddd;
+}
+
+.page-item>a{
+    color: #0275d8;
+}

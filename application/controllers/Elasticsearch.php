@@ -20,7 +20,7 @@ class Elasticsearch extends CI_Controller {
 
 	public function search_in_metadata()
 	{
-		$query = $this->input->get('query', TRUE);
+		$query = @$this->input->get('query', TRUE);
 		$offset = $this->input->get('offset', TRUE);
 
 		$response = $this->elasticsearch_model->search_in_metadata($query, $offset);
