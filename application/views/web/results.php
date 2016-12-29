@@ -84,7 +84,8 @@
 										http://www.myexperiment.org/workflows/<?php print $workflow['_id'];?>
 									</div>
 									<div class="results-workflow-description">
-										<?php print $workflow['_source']['description'];?>
+
+										<?php print character_limiter($workflow['_source']['description'], 320);?>
 									</div>
 									<div class="results-workflow-wfms">
 										Workflow Management System: <strong>Taverna</strong>
@@ -99,22 +100,6 @@
 						<nav aria-label="..." class="text-xs-center">
 							<ul class="pagination pagination-sm">
 								<?php print $pagination->create_links(); ?>
-
-								<!--<li class="page-item">
-									<a class="page-link" href="#" aria-label="Previous">
-										<span aria-hidden="true">&laquo;</span>
-										<span class="sr-only">Previous</span>
-									</a>
-								</li>
-								<li class="page-item"><a class="page-link" href="#">1</a></li>
-								<li class="page-item"><a class="page-link" href="#">2</a></li>
-								<li class="page-item"><a class="page-link" href="#">3</a></li>
-								<li class="page-item">
-									<a class="page-link" href="#" aria-label="Next">
-										<span aria-hidden="true">&raquo;</span>
-										<span class="sr-only">Next</span>
-									</a>
-								</li>-->
 							</ul>
 							<!-- ul -->
 						</nav>

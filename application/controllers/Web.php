@@ -28,6 +28,7 @@ class Web extends CI_Controller {
 		$data['msg'] = @$response['msg'];
 
 		$this->load->library('pagination');
+		$this->load->helper('text');
 
 		$config['base_url'] = base_url().'index.php/web/results/';
 		$config['total_rows'] = ($data['total'] == '')? 0 : $data['total'];
