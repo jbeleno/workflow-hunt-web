@@ -88,7 +88,7 @@
 										<?php print character_limiter($workflow['_source']['description'], 320);?>
 									</div>
 									<div class="results-workflow-wfms">
-										Workflow Management System: <strong>Taverna</strong>
+										Workflow Management System: <strong><?php print $workflow['_source']['wfms'];?></strong>
 									</div>
 								</div>
 								<!-- .results-workflow -->
