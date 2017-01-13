@@ -187,7 +187,7 @@ class Workflow_model extends CI_Model {
     		$id_workflow = $workflow->id;
 
     		// Construct dinamically a URL for each workflow
-    		$PARAMS = "id=".$id_workflow."&elements=title,description,tags";
+    		$PARAMS = "id=".$id_workflow."&elements=title,description,tags,type";
     		$url = $this->WORKFLOW_URL."?".$PARAMS;
 
     		// Request the content in XML format
@@ -220,6 +220,7 @@ class Workflow_model extends CI_Model {
 										//'id' => $id_workflow,
 										'title' => $title,
 										'description' => $description,
+										'wfms' => $xml->type,
 										'date_last_update' => date("Y-m-d H:i:s")
 									);
 
@@ -254,7 +255,7 @@ class Workflow_model extends CI_Model {
     	$this->db->insert_batch('tag', $tags);
     	$this->db->insert_batch('tag_wf', $tag_wf);
 
-    	$this->db->update_batch('workflow', $workflows, 'id');
+    	// $this->db->update_batch('workflow', $workflows, 'id');
 
     	return array('status' => 'OK');
     }

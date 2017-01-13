@@ -83,7 +83,7 @@ class Elasticsearch_model extends CI_Model {
 	 */
     public function index_metadata()
     {
-    	$this->db->select('id, title, description');
+    	$this->db->select('id, title, description, wfms');
     	$query_workflows = $this->db->get('workflow');
 
     	foreach ($query_workflows->result() as $workflow)
@@ -92,6 +92,7 @@ class Elasticsearch_model extends CI_Model {
     		$workflow_id = $workflow->id;
     		$workflow_title = $workflow->title;
     		$workflow_description = $workflow->description;
+    		$workflow_wfms = $workflow->wfms;
     		$workflow_tags = array();
 
     		// Find the workflow tags
@@ -115,7 +116,8 @@ class Elasticsearch_model extends CI_Model {
 			    'body' => [
 			    	'title' => $workflow_title,
 			    	'description' => $workflow->description,
-			    	'tags' => $workflow_tags
+			    	'tags' => $workflow_tags,
+			    	'wfms' => $workflow_wfms
 			    ]
 			];
 
@@ -124,6 +126,41 @@ class Elasticsearch_model extends CI_Model {
     	}
 
     	return array('status' => 'OK');
+    }
+
+    // --------------------------------------------------------------------
+
+    /**
+	 * Restart Index in ElasticSearch
+	 *
+	 * Due to some problems like uncomplete metadata in the indexes, it is
+	 * necessary to destroy the current index and recreate it.
+	 *
+	 * @return	array
+	 */
+    public function restart_index_metadata()
+    {
+    	// Delete the index
+    	$deleteParams = [
+		    'index' => 'underworld_index'
+		];
+
+		$response = $this->client->indices()->delete($deleteParams);
+
+		// Create the index
+		$params = [
+		    'index' => 'underworld_index',
+		    'body' => [
+		        'settings' => [
+		            'number_of_shards' => 2,
+		            'number_of_replicas' => 0
+		        ]
+		    ]
+		];
+
+		$response = $this->client->indices()->create($params);
+
+		return array('status' => 'OK');
     }
 
     // --------------------------------------------------------------------

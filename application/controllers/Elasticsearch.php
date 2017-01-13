@@ -18,6 +18,15 @@ class Elasticsearch extends CI_Controller {
 	         ->set_output(json_encode($response));
 	}
 
+	public function restart_index_metadata()
+	{
+		$response = $this->elasticsearch_model->restart_index_metadata();
+
+		$this->output
+	         ->set_content_type('application/json')
+	         ->set_output(json_encode($response));
+	}
+
 	public function search_in_metadata()
 	{
 		$query = @$this->input->get('query', TRUE);

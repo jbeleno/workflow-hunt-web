@@ -29,7 +29,7 @@
 					<div class="input-group">
 						<input type="text" class="form-control results-input-search" name="query" value="<?php print $query; ?>">
 						<span class="input-group-btn">
-					        <button class="btn btn-primary results-btn-search" type="button">
+					        <button class="btn btn-primary results-btn-search" type="submit">
 					        	<span class="fa fa-search"> </span>
 					        </button>
 					        <!-- .results-btn-search -->
@@ -50,9 +50,9 @@
 					if($status == 'BAD')
 					{
 				?>
-					<div class="results-not-found hidden-xs-up">
+					<div class="results-not-found">
 						<p>
-							Your search - <strong>[INSERT HERE THE USER QUERY]</strong> - 
+							Your search - <strong><?php print $query; ?></strong> - 
 							did not match any workflow.
 						</p>
 						<p>Suggestions:</p>
