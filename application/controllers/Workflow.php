@@ -9,6 +9,15 @@ class Workflow extends CI_Controller {
         $this->load->model('workflow_model');
     }
 
+    public function count_words()
+	{
+		$response = $this->workflow_model->count_words();
+
+		$this->output
+	         ->set_content_type('application/json')
+	         ->set_output(json_encode($response));
+	}
+
 	public function insert_workflow_metadata()
 	{
 		$response = $this->workflow_model->insert_workflow_ids(50);

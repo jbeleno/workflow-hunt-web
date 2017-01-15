@@ -103,6 +103,41 @@ class Workflow_model extends CI_Model {
     // --------------------------------------------------------------------
 
     /**
+	 * Count and Save all Words in the Workflow Metadata 
+	 *
+	 * @return	array
+	 */
+    public function count_words()
+    {
+    	$this->db->select('id, title, description');
+    	$query_workflow = $this->db->get('workflow');
+
+    	foreach ($query_workflow->result() as $workflow) 
+    	{
+    		$word_count = str_word_count($workflow->title) + str_word_count($workflow->description);
+
+    		$this->db->select('name');
+    		$this->db->where('workflow_id', $workflow->id);
+    		$this->db->from('tag_wf');
+    		$this->db->join('tag', 'tag.id = tag_wf.tag_id');
+    		$query_tag = $this->db->get();
+
+    		foreach ($query_tag->result() as $tag) 
+    		{
+    			$word_count = $word_count + str_word_count($tag->name);
+    		}
+
+    		$this->db->set('word_count', $word_count);
+    		$this->db->where('id', $workflow->id);
+    		$this->db->update('workflow');
+    	}
+
+    	return array('status' => 'OK');
+    }
+
+    // --------------------------------------------------------------------
+
+    /**
 	 * Insert Workflow Identifiers in Database
 	 *
 	 * @param	int	$wf_per_page	Number of workflows per page in the API
