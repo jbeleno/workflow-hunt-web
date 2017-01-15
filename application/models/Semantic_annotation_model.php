@@ -68,6 +68,7 @@ class Semantic_annotation_model extends CI_Model {
 	 */
     public function annotate_workflows()
     {
+    	// ***** Ontology terms ****
     	$this->db->select('id, label');
     	$query_terms = $this->db->get('term');
 
@@ -106,6 +107,51 @@ class Semantic_annotation_model extends CI_Model {
 
     			$semantic_annotations[] = array(
     				'id_term' => $term->id,
+    				'id_workflow' => $tag_wf->workflow_id,
+    				'hits' => 1,
+    				'date' => date("Y-m-d H:i:s")
+    			);
+    		}
+    	}
+
+    	// **** Synonyms of the ontology terms ****
+
+    	$this->db->select('id_term, name');
+    	$query_synonym = $this->db->get('synonym');
+
+    	// For each synonym, I perform semantic annotation on the 
+    	// workflow metadata
+    	foreach ($query_synonym->result() as $synonym) 
+    	{
+    		$this->db->select('id');
+    		$this->db->like('title', $synonym->name);
+    		$this->db->or_like('description', $synonym->name);
+    		$query_workflow = $this->db->get('workflow');
+
+    		// It annotates the workflow title and description
+    		foreach ($query_workflow->result() as $workflow) 
+    		{
+    			$semantic_annotations[] = array(
+    				'id_term' => $synonym->id_term,
+    				'id_workflow' => $workflow->id,
+    				'hits' => 1,
+    				'date' => date("Y-m-d H:i:s")
+    			);
+    		}
+
+    		$this->db->select('id');
+    		$this->db->like('name', $synonym->name);
+    		$query_tags = $this->db->get('tag');
+
+    		// It annotates the workflow tags
+    		foreach ($query_tags->result() as $tag) 
+    		{
+    			$this->db->select('workflow_id');
+    			$this->db->where('tag_id', $tag->id);
+    			$tag_wf = $this->db->get('tag_wf', 1, 0)->row();
+
+    			$semantic_annotations[] = array(
+    				'id_term' => $synonym->id_term,
     				'id_workflow' => $tag_wf->workflow_id,
     				'hits' => 1,
     				'date' => date("Y-m-d H:i:s")
