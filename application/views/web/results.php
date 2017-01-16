@@ -37,6 +37,25 @@
 					    <!-- .input-group-btn -->
 					</div>
 					<!-- .input-group -->
+
+					<div>
+						<?php 
+							if($method == "semantic")
+							{
+						?>
+							<a href="<?php print base_url();?>index.php/web/results/?query=<?php print urlencode($query); ?>" class="results-tab">Keyword</a>
+							<a href="<?php print base_url();?>index.php/web/results/?query=<?php print urlencode($query); ?>&method=semantic" class="results-tab-active">Semantic</a>
+						<?php
+							}
+							else
+							{ 
+						?>
+							<a href="<?php print base_url();?>index.php/web/results/?query=<?php print urlencode($query); ?>" class="results-tab-active">Keyword</a>
+							<a href="<?php print base_url();?>index.php/web/results/?query=<?php print urlencode($query); ?>&method=semantic" class="results-tab">Semantic</a>
+						<?php 
+							}
+						?>
+					</div>
 				</form>
 				<!-- form -->
 			</div>

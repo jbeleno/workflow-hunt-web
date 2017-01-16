@@ -7,6 +7,7 @@ class Web extends CI_Controller {
     {
         parent::__construct();
         $this->load->model('elasticsearch_model');
+        $this->load->model('semantic_model');
     }
 
 	public function index()
@@ -16,12 +17,23 @@ class Web extends CI_Controller {
 
 	public function results(){
 		$query = @$this->input->get('query', TRUE);
+		$method = @$this->input->get('method', TRUE);
 		$offset = @$this->uri->segment(3);
 		$offset = ($offset == '')? 0 : $offset;
 
-		$response = $this->elasticsearch_model->search_in_metadata($query, $offset);
+		$response = array();
+		
+		if($method == "semantic")
+		{
+			$response = $this->semantic_model->search($query, $offset);
+		}
+		else
+		{
+			$response = $this->elasticsearch_model->search_in_metadata($query, $offset);
+		}
 
 		$data['query'] = @$query;
+		$data['method'] = @$method;
 		$data['status'] = @$response['status'];
 		$data['results'] = @$response['results'];
 		$data['total'] = @$response['total'];

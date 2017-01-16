@@ -37,13 +37,13 @@
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 /**
- * WorkflowHunt Semantic Annotation Model
+ * WorkflowHunt Semantic Model
  *
  * @category	Models
  * @author		Juan Sebastián Beleño Díaz
  * @link		xxx
  */
-class Semantic_annotation_model extends CI_Model {
+class Semantic_model extends CI_Model {
 
 	/**
 	 * Constructor
@@ -79,8 +79,8 @@ class Semantic_annotation_model extends CI_Model {
     	foreach ($query_terms->result() as $term) 
     	{
     		$this->db->select('id');
-    		$this->db->like('title', $term->label);
-    		$this->db->or_like('description', $term->label);
+    		$this->db->like('title', ' '.$term->label.' ');
+    		$this->db->or_like('description', ' '.$term->label.' ');
     		$query_workflow = $this->db->get('workflow');
 
     		// It annotates the workflow title and description
@@ -95,7 +95,7 @@ class Semantic_annotation_model extends CI_Model {
     		}
 
     		$this->db->select('id');
-    		$this->db->like('name', $term->label);
+    		$this->db->like('name', ' '.$term->label.' ');
     		$query_tags = $this->db->get('tag');
 
     		// It annotates the workflow tags
@@ -123,9 +123,15 @@ class Semantic_annotation_model extends CI_Model {
     	// workflow metadata
     	foreach ($query_synonym->result() as $synonym) 
     	{
+            // Some synonyms are blank spaces, so we need to skip them
+            if($synonym->name == '')
+            {
+                break;
+            }
+
     		$this->db->select('id');
-    		$this->db->like('title', $synonym->name);
-    		$this->db->or_like('description', $synonym->name);
+    		$this->db->like('title', ' '.$synonym->name.' ');
+    		$this->db->or_like('description', ' '.$synonym->name.' ');
     		$query_workflow = $this->db->get('workflow');
 
     		// It annotates the workflow title and description
@@ -140,7 +146,7 @@ class Semantic_annotation_model extends CI_Model {
     		}
 
     		$this->db->select('id');
-    		$this->db->like('name', $synonym->name);
+    		$this->db->like('name', ' '.$synonym->name.' ');
     		$query_tags = $this->db->get('tag');
 
     		// It annotates the workflow tags
@@ -167,6 +173,116 @@ class Semantic_annotation_model extends CI_Model {
     // --------------------------------------------------------------------
 
     /**
+     * Search Workflows based on Semantic Annotations
+     *
+     * This is a semantic-based search based on a semantic annotations in 
+     * the relational database. Moreover, it will be implemented a TF-IDF 
+     * of semantic results. Firstly, we find the ontology terms on 
+     * the query. Finally, we find all the workflows that have semantic 
+     * annotations that match with the ontology terms in the query.
+     *
+     * @param   int $query  User's query in the interface
+     * @param   int $offset Offset of the results
+     * @param   int $size   Size of the results
+     * @return  array
+     */
+    public function search($query, $offset = 0, $size = 10)
+    {
+        // Defining the ontology terms inside the query
+        $ontology_terms = array();
+
+        // Getting Ontology Terms Directly
+        $this->db->select('id, label');
+        $db_query_terms = $this->db->get('term');
+
+        // For each ontology term, I find if it is inside the query
+        foreach ($db_query_terms->result() as $term) 
+        {
+            if (stripos($query, $term->label) !== false) 
+            {
+                $ontology_terms[] = $term->id;
+            }
+        }
+
+        // Getting Ontology Terms Indirectly using Synonyms
+        $this->db->select('id_term, name');
+        $db_query_synonym = $this->db->get('synonym');
+
+        // For each ontology term (synonym), I find if it is inside the query
+        foreach ($db_query_synonym->result() as $synonym) 
+        {
+            // Some synonyms are blank spaces, so we need to skip them
+            if($synonym->name == '')
+            {
+                break;
+            }
+
+            if (stripos($query, $synonym->name) !== false) 
+            {
+                $ontology_terms[] = $synonym->id_term;
+            }            
+        }
+
+        if(empty($ontology_terms))
+        {
+            return array(
+                    'status' => 'BAD',
+                    'msg' => 'There are not results.'
+                );
+        }
+
+        // Retrieve Workflow with Semantic Annotations that contains 
+        // Ontology Terms in the query
+        $this->db->select('workflow.id AS id, title, description, wfms');
+        $this->db->where_in('id_term', $ontology_terms);
+        $this->db->from('s_annotation');
+        $this->db->join('workflow', 'workflow.id = s_annotation.id_workflow');
+        $this->db->group_by("workflow.id");
+        $this->db->limit($size, $offset);
+        $db_query_workflow = $this->db->get();
+
+        $this->db->select('workflow.id AS id, title, description, wfms');
+        $this->db->where_in('id_term', $ontology_terms);
+        $this->db->from('s_annotation');
+        $this->db->join('workflow', 'workflow.id = s_annotation.id_workflow');
+        $this->db->group_by("workflow.id");
+        $total = $this->db->count_all_results();
+
+        $results = array();
+
+        // Transform the results in a elasticsearch compatible format
+        foreach ($db_query_workflow->result() as $workflow) 
+        {
+            $results[] = array(
+                '_id' => $workflow->id,
+                '_source' => array(
+                                'title' => $workflow->title,
+                                'description' => $workflow->description,
+                                'wfms' => $workflow->wfms
+                            )
+            );
+        }
+
+        if($offset < $total)
+        {
+            return array(
+                'status' => 'OK',
+                'results' => $results,
+                'total' => $total
+            );
+        }
+        
+        
+        return array(
+                    'status' => 'BAD',
+                    'msg' => 'There are not results.'
+                );
+
+    }
+
+    // --------------------------------------------------------------------
+
+    /**
 	 * Select the Scientific Domain for each workflow
 	 *
 	 * For each workflow, I classify them using the terms in each ontology.
@@ -182,7 +298,8 @@ class Semantic_annotation_model extends CI_Model {
     {
 
     }
+
 }
 
-/* End of file Semantic_annotation_model.php */
-/* Location: ./application/models/Semantic_annotation_model.php */
+/* End of file Semantic_search_model.php */
+/* Location: ./application/models/Semantic_search_model.php */
