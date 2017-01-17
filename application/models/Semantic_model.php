@@ -299,6 +299,87 @@ class Semantic_model extends CI_Model {
 
     }
 
+    // --------------------------------------------------------------------
+
+    /**
+     * Show the Workflow Details with Semantic Annotations
+     *
+     * I received the workflow identificator and show title, descriptions, and
+     * tags. Moreover, I show the semantic annotations.
+     *
+     * @param   int $id_workflow   Workflow identificator
+     * @return  array
+     */
+    public function show_annotations($id_workflow)
+    {
+        // Getting title and description
+        $this->db->select('title, description');
+        $this->db->where('id', $id_workflow);
+        $db_query_workflow = $this->db->get('workflow', 1, 0);
+        $workflow = $db_query_workflow->row();
+        $title = $workflow->title;
+        $description = $workflow->description;
+
+        // Getting the workflow tags
+        $this->db->select('name');
+        $this->db->where('workflow_id', $id_workflow);
+        $this->db->from('tag');
+        $this->db->join('tag_wf', 'tag_wf.tag_id = tag.id');
+        $db_tags_query = $this->db->get();
+        $tags = "";
+
+        foreach ($db_tags_query->result() as $tag) {
+            $tags .= $tag->name.', ';
+        }
+
+        // Load Text Helper
+        $this->load->helper('text');
+
+        // Getting the semantic annotations
+        $this->db->select('label, color');
+        $this->db->where('id_workflow', $id_workflow);
+        $this->db->from('s_annotation');
+        $this->db->join('term', 'term.id = s_annotation.id_term');
+        $this->db->join('ontology', 'ontology.id = term.id_ontology');
+        $db_terms_query = $this->db->get();
+        
+        foreach ($db_terms_query->result() as $term) {
+            $title = highlight_phrase($title, $term->label, '<strong style="color:'.$term->color.';">', '</strong>');
+            $description = highlight_phrase($description, $term->label, '<strong style="color:'.$term->color.';">', '</strong>');
+            $tags = highlight_phrase($tags, $term->label, '<strong style="color:'.$term->color.';">', '</strong>');
+        }
+
+        // Getting the synonyms of semantic annotations
+        $this->db->select('synonym.name as name, color');
+        $this->db->where('id_workflow', $id_workflow);
+        $this->db->from('s_annotation');
+        $this->db->join('term', 'term.id = s_annotation.id_term');
+        $this->db->join('ontology', 'ontology.id = term.id_ontology');
+        $this->db->join('synonym', 'synonym.id_term = s_annotation.id_term');
+        $db_synonyms_query = $this->db->get();
+
+        foreach ($db_synonyms_query->result() as $synonym) {
+            $title = highlight_phrase($title, $synonym->name, '<strong style="color:'.$synonym->color.';">', '</strong>');
+            $description = highlight_phrase($description, $synonym->name, '<strong style="color:'.$synonym->color.';">', '</strong>');
+            $tags = highlight_phrase($tags, $synonym->name, '<strong style="color:'.$synonym->color.';">', '</strong>');
+        }
+
+        // Ontologies
+        $this->db->select('prefix, color');
+        $db_ontology_query = $this->db->get('ontology');
+
+        return array(
+            'status' => 'OK',
+            'workflow' =>   array(
+                                'id' => $id_workflow,
+                                'title' => $title,
+                                'description' => $description,
+                                'tags' => $tags
+                            ),
+            'ontologies' => $db_ontology_query->result()
+        );
+    }
+
 }
 
 /* End of file Semantic_search_model.php */

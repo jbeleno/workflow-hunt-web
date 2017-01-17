@@ -83,7 +83,7 @@ class Ontology_model extends CI_Model {
 	 */
     public function download_terms()
     {
-    	$this->db->select('name');
+    	$this->db->select('id, name');
     	$query_ont = $this->db->get('ontology');
 
     	foreach ($query_ont->result() as $ontology) 
@@ -121,6 +121,7 @@ class Ontology_model extends CI_Model {
 					{
 						$data_term = array(
 							'label' => $term->label,
+							'id_ontology' => $ontology->id,
 							'description' => $term->description[0],
 							'iri' => $term->iri,
 							'short_form' => $term->short_form,

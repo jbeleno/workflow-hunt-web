@@ -66,4 +66,18 @@ class Web extends CI_Controller {
 		$this->load->view('web/results', $data);
 	}
 
+	public function workflow()
+	{
+		$id_workflow = @$this->input->get('id', TRUE);
+		$response = $this->semantic_model->show_annotations($id_workflow);
+
+		$data['title'] = @$response['workflow']['title'];
+		$data['description'] = @$response['workflow']['description'];
+		$data['tags'] = @$response['workflow']['tags'];
+		$data['id'] = @$response['workflow']['id'];
+		$data['ontologies'] = @$response['ontologies'];
+
+		$this->load->view('web/workflow', $data);
+	}
+
 }

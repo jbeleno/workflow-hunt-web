@@ -109,6 +109,19 @@
 									<div class="results-workflow-wfms">
 										Workflow Management System: <strong><?php print $workflow['_source']['wfms'];?></strong>
 									</div>
+									<?php 
+										if($method == "semantic")
+										{
+									?>
+									<div class="results-semantic-annotations">
+										<strong> Semantic annotations: </strong>
+										<a target="_blank" href="<?php print base_url().'index.php/web/workflow?id='.$workflow['_id']; ?>">
+											READ MORE		
+										</a>
+									</div>
+									<?php
+										}
+									?>
 								</div>
 								<!-- .results-workflow -->
 							<?php

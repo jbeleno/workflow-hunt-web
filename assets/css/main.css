@@ -70,6 +70,11 @@ html, body {
     color: #757575;
 }
 
+.results-semantic-annotations{
+    font-size: 0.85em;
+    color: #757575;
+}
+
 .page-item{
     position: relative;
     float: left;
@@ -118,4 +123,20 @@ html, body {
 .results-tab-active:active, .results-tab-active:focus, .results-tab-active:hover{
     color: #2196f3;
     text-decoration: none;
+}
+
+/******************************* Workflow Page ********************************/
+
+.margin-top-05{
+    margin-top: 0.5em;
+}
+
+.ontology-square-color{
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+}
+
+.ontology-text{
+    vertical-align: text-bottom;
 }
