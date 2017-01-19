@@ -344,9 +344,9 @@ class Semantic_model extends CI_Model {
         $db_terms_query = $this->db->get();
         
         foreach ($db_terms_query->result() as $term) {
-            $title = highlight_phrase($title, $term->label, '<strong style="color:'.$term->color.';">', '</strong>');
-            $description = highlight_phrase($description, $term->label, '<strong style="color:'.$term->color.';">', '</strong>');
-            $tags = highlight_phrase($tags, $term->label, '<strong style="color:'.$term->color.';">', '</strong>');
+            $title = highlight_phrase($title, ' '.$term->label.' ', '<strong style="color:'.$term->color.';">', '</strong>');
+            $description = highlight_phrase($description, ' '.$term->label.' ', '<strong style="color:'.$term->color.';">', '</strong>');
+            $tags = highlight_phrase($tags, ' '.$term->label.' ', '<strong style="color:'.$term->color.';">', '</strong>');
         }
 
         // Getting the synonyms of semantic annotations
@@ -359,9 +359,9 @@ class Semantic_model extends CI_Model {
         $db_synonyms_query = $this->db->get();
 
         foreach ($db_synonyms_query->result() as $synonym) {
-            $title = highlight_phrase($title, $synonym->name, '<strong style="color:'.$synonym->color.';">', '</strong>');
-            $description = highlight_phrase($description, $synonym->name, '<strong style="color:'.$synonym->color.';">', '</strong>');
-            $tags = highlight_phrase($tags, $synonym->name, '<strong style="color:'.$synonym->color.';">', '</strong>');
+            $title = highlight_phrase($title, ' '.$synonym->name.' ', '<strong style="color:'.$synonym->color.';">', '</strong>');
+            $description = highlight_phrase($description, ' '.$synonym->name.' ', '<strong style="color:'.$synonym->color.';">', '</strong>');
+            $tags = highlight_phrase($tags, ' '.$synonym->name.' ', '<strong style="color:'.$synonym->color.';">', '</strong>');
         }
 
         // Ontologies
