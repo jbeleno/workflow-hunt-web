@@ -9,6 +9,7 @@ Theoretical Foundation
 Semantic Annotations
 ____________________
 
+Code::
         def semantic_annotation()
                 // Semantic Annotations: <s, m, o>
                 // s: subject
@@ -28,6 +29,7 @@ ____________________
 Semantic Search
 _______________
 
+Code::
         def semantic_search( query )
                 terms_detected = ∅
                 results = ∅
