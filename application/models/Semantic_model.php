@@ -317,8 +317,8 @@ class Semantic_model extends CI_Model {
         $this->db->where('id', $id_workflow);
         $db_query_workflow = $this->db->get('workflow', 1, 0);
         $workflow = $db_query_workflow->row();
-        $title = $workflow->title;
-        $description = $workflow->description;
+        $title = $workflow->title.' ';
+        $description = $workflow->description.' ';
 
         // Getting the workflow tags
         $this->db->select('name');
@@ -326,10 +326,10 @@ class Semantic_model extends CI_Model {
         $this->db->from('tag');
         $this->db->join('tag_wf', 'tag_wf.tag_id = tag.id');
         $db_tags_query = $this->db->get();
-        $tags = "";
+        $tags = " ";
 
         foreach ($db_tags_query->result() as $tag) {
-            $tags .= $tag->name.', ';
+            $tags .= $tag->name.' - ';
         }
 
         // Load Text Helper
