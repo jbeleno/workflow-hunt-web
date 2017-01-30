@@ -10,7 +10,7 @@ This project has two important parts: semantic annotations and semantic search b
 
 We perform semantic annotations of workflows following the code below. First, we iterate over the ontologies available in the system. Second, we iterate over the terms of each ontology (also known as ontology classes). Third, we iterate over the workflows available in the system. Fourth, we verify if the ontology term is contained in the workflow metadata using exact string comparison if so, then we perform a semantic annotation using that ontology term and the workflow. Fifth, we verify if the synonym of the ontology term is contained in the workflow metadata if so, then we perform a semantic annotation using the ontology term associated with the synonym and the workflow.
 
-Semantic annotations use the format (s, p, o, c), where s is the subject of annotation (workflow), o is the object of annotation (a term in a domain ontology), p is the predicate (the relationship between s and p), and c is the context (provenance information) [1].
+A semantic annotation is a tuple (s, p, o, c), where s is the subject of annotation (workflow), o is the object of annotation (a term in a domain ontology), p is the predicate (the relationship between s and p), and c is the context (provenance information) [1].
 
 ```
 def semantic_annotation()
@@ -66,11 +66,17 @@ We use an exact string comparison between the text in the workflow metadata and 
 
 # Results
 
-The results of this project are available [here!](http://52.27.16.14/workflow-hunt-web/). We can see the difference between keyword-based search and semantic-based search with a query like "chromosomes". 
+The results of this project are available [here](http://52.27.16.14/workflow-hunt-web/). We can see the difference between keyword-based search and semantic-based search with a query like "chromosomes". 
 
-That word is contained in the metadata of just one workflow. Thus, the keyword-based search should show just that result. Nevertheless, as we can see in Figure 1, our current implementation of the keyword-based search in ElasticSearch judges that result with a low score and does not return it. 
+![keyword-based-search](https://raw.githubusercontent.com/jbeleno/workflow-hunt-web/master/assets/img/keyword-based-search.png)
+
+That word is contained in the metadata of just one workflow. Thus, the keyword-based search should show just that result. Nevertheless, as we can see in Figure 1, our current implementation of the keyword-based search in ElasticSearch judges that result with a low score and does not return it.
+
+![semantic-based-search](https://raw.githubusercontent.com/jbeleno/workflow-hunt-web/master/assets/img/semantic-based-search.png)
 
 On the other hand, in Figure 2 we can see that the semantic-based search returns 22 results associated with that query (without ranking their relevance). These results are shown because according to the EDAM ontology, the word "chromosomes" is semantically related to terms like "Ancient DNA", "DNA Analysis" and "DNA".
+
+![semantic-annotations](https://raw.githubusercontent.com/jbeleno/workflow-hunt-web/master/assets/img/semantic-annotations.png)
 
 Moreover, we can see in Figure 3 a graphical representation of the semantic annotations in the workflow metadata. This graphical representation is available in the retrieval system by clicking on "READ MORE", which is present in all the semantic results.
 
