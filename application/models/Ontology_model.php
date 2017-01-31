@@ -83,7 +83,7 @@ class Ontology_model extends CI_Model {
 	 */
     public function download_terms()
     {
-    	$this->db->select('id, name');
+    	$this->db->select('id, name, prefix');
     	$query_ont = $this->db->get('ontology');
 
     	foreach ($query_ont->result() as $ontology) 
@@ -141,6 +141,7 @@ class Ontology_model extends CI_Model {
 								$data_synonym = array(
 									'id_term' => $term_id,
 									'name' => $synonym,
+									'source' => $ontology->prefix,
 									'date' => date("Y-m-d H:i:s")
 								);
 
