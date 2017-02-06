@@ -60,7 +60,7 @@ def semantic_search( query )
 
 # Implementation
 
-For this project, we used the ontologies EDAM and CHEMINF. EDAM is an ontology of bioinformatics information, including operations, types of data, topics, and formats [2]. CHEMINF is an ontology of chemical information, including terms, and algorithms used in chemistry [3]. The ontology terms and synonyms were collected from the Ontology Lookup Service. Ontology Lookup Service is a service that allows querying, browsing, and navigating over a database that integrates several biomedical ontologies and related vocabulary [4].
+For this project, we used the ontologies EDAM and CHEMINF. EDAM is an ontology of bioinformatics information, including operations, types of data, topics, and formats [2]. CHEMINF is an ontology of chemical information, including terms, and algorithms used in chemistry [3]. The ontology terms and synonyms were collected from the Ontology Lookup Service. Ontology Lookup Service is a service that allows querying, browsing, and navigating over a database that integrates several biomedical ontologies and related vocabulary [4]. Moreover, we use WordNet [5] as an additional source of synonyms to complement the synonyms collected in the Ontology Lookup Service.
 
 We use an exact string comparison between the text in the workflow metadata and the ontology terms and synonyms to produce semantic annotations. Nevertheless, we set the restriction of adding a white space at the start and end of each term and synonym to decrease the possibilities of false positives in the semantic annotations. For example, consider the word "ph" considered a synonym of the ontology term "PHYLIP format" in the EDAM ontology. Without those spaces is possible to perform wrong semantic annotations for texts like "Phylogenetic" that can be annotated with the ontology term "PHYLIP Format" just because "ph" is a substring of "Phylogenetic".
 
@@ -89,3 +89,5 @@ Moreover, we can see in Figure 3 a graphical representation of the semantic anno
 [3] Hastings, J., Chepelev, L., Willighagen, E., Adams, N., Steinbeck, C., & Dumontier, M. (2011). The chemical information ontology: provenance and disambiguation for chemical data on the biological semantic web. PloS one, 6(10), e25513.
 
 [4] Côté, R. G., Jones, P., Apweiler, R., & Hermjakob, H. (2006). The Ontology Lookup Service, a lightweight cross-platform tool for controlled vocabulary queries. BMC bioinformatics, 7(1), 97.
+
+[5] Christiane Fellbaum (1998, ed.) WordNet: An Electronic Lexical Database. Cambridge, MA: MIT Press.
