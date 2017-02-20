@@ -43,21 +43,21 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * @author		Juan Sebastián Beleño Díaz
  * @link		xxx
  */
-class Author_model extends CI_Model {
+class Group_model extends CI_Model {
 
 	/**
-	 * Workflow Users URL from API
+	 * Workflow Groups URL from API
 	 *
 	 * @var	string
 	 */
-	private $USERS_URL = "http://www.myexperiment.org/users.xml";
+	private $GROUPS_URL = "http://www.myexperiment.org/groups.xml";
 
 	/**
-	 * Workflow User URL from API
+	 * Workflow Group URL from API
 	 *
 	 * @var	string
 	 */
-	private $USER_URL = "http://www.myexperiment.org/user.xml";
+	private $GROUP_URL = "http://www.myexperiment.org/group.xml";
 
 	// --------------------------------------------------------------------
 
@@ -75,22 +75,22 @@ class Author_model extends CI_Model {
     // --------------------------------------------------------------------
 
     /**
-	 * Insert Workflow Users in Database
+	 * Insert Workflow Groups in Database
 	 *
-	 * @param	int	$users_per_page	Number of users per page in the API
+	 * @param	int	$groups_per_page	Number of groups per page in the API
 	 * @return	array
 	 */
-    public function insert_users_ids($users_per_page = 50)
+    public function insert_groups_ids($groups_per_page = 50)
     {
     	$flag = true;
     	$page = 1;
-    	$users = array();
+    	$groups = array();
 
     	while($flag)
     	{
     		// Construct dinamically a URL until reach all the workflows
-    		$PARAMS = "sort=id&num=".$users_per_page."&page=".$page;
-    		$url = $this->USERS_URL."?".$PARAMS;
+    		$PARAMS = "sort=id&num=".$groups_per_page."&page=".$page;
+    		$url = $this->GROUPS_URL."?".$PARAMS;
 
     		// Request the content in XML format
     		$context  = stream_context_create(
@@ -107,12 +107,12 @@ class Author_model extends CI_Model {
 			if(!empty($xml))
 			{
 				// If the content is converted into XML, we'll create the array
-				// of users' ids
-				foreach ($xml->children() as $user) 
+				// of groups' ids
+				foreach ($xml->children() as $group) 
 				{
-					$users[] = array(
-										'id' => $user['id'],
-										'name' => $user,
+					$groups[] = array(
+										'id' => $group['id'],
+										'title' => $group,
 										'date' => date("Y-m-d H:i:s"),
 										'date_last_update' => date("Y-m-d H:i:s")
 									);
@@ -127,7 +127,7 @@ class Author_model extends CI_Model {
     		$page++;
     	}
 
-    	$this->db->insert_batch('author', $users);
+    	$this->db->insert_batch('group', $groups);
 
     	return array('status' => 'OK');
     }
@@ -137,24 +137,23 @@ class Author_model extends CI_Model {
     /**
 	 * Update Users Metadata
 	 *
-	 * We need to collect more detailed metadata about users. For example,
-	 * we need to collect metadata such as email, website, photo, etc.
+	 * We need to collect more detailed metadata about groups. For example,
+	 * we need to collect metadata such as title, description, etc.
 	 *
 	 * @return	array
 	 */
-    public function update_user_metadata()
+    public function update_group_metadata()
     {
     	$this->db->select('id');
-    	//$this->db->where('id >', 23655);
-    	$query = $this->db->get('author');
+       	$query = $this->db->get('group');
 
-    	foreach ($query->result() as $user) 
+    	foreach ($query->result() as $group) 
     	{
-    		$id_user = $user->id;
+    		$id_group = $group->id;
 
     		// Construct dinamically a URL for each workflow
-    		$PARAMS = "id=".$id_user."&elements=name,email,avatar,website,country,city";
-    		$url = $this->USER_URL."?".$PARAMS;
+    		$PARAMS = "id=".$id_group."&elements=title,description,members";
+    		$url = $this->GROUP_URL."?".$PARAMS;
 
     		// Request the content in XML format
     		$context  = stream_context_create(
@@ -170,25 +169,33 @@ class Author_model extends CI_Model {
 
 			if(!empty($xml))
 			{
-				$user/*[]*/ = array(
-										//'id' => $id_user,
-										'name' => $xml->name,
-										'email' => $xml->email,
-										'photo' => $xml->avatar['resource'],
-										'website' =>  $xml->website,
-										'country' => $xml->country,
-										'city' => $xml->city,
+				$group/*[]*/ = array(
+										//'id' => $id_group,
+										'title' => $xml->title,
+										'description' => $xml->description,
 										'date_last_update' => date("Y-m-d H:i:s")
 									);
 
-				$this->db->where('id', $id_user);
-				$this->db->update('author', $user);
+				$this->db->where('id', $id_group);
+				$this->db->update('group', $group);
+
+				foreach ($xml->members->children() as $member) 
+				{
+					$arr_member = array(
+										'id_group' => $id_group,
+										'id_member' => $member['id'],
+										'date' => date("Y-m-d H:i:s")
+									);
+
+					$this->db->insert('member', $arr_member);
+				}
 			}
 		}
 
 		return array('status' => 'OK');
     }
+
 }
 
-/* End of file Author_model.php */
-/* Location: ./application/models/Author_model.php */
+/* End of file Group_model.php */
+/* Location: ./application/models/Group_model.php */
