@@ -198,6 +198,75 @@ class Workflow_model extends CI_Model {
     // --------------------------------------------------------------------
 
     /**
+	 * Update Workflow Metadata to Include Analytics in Database
+	 *
+	 * The workflow metadata is extracted from the API and stored in the 
+	 * database. This information is complementary for the one that exist 
+	 * in the function update_workflow_metadata() to feed database with
+	 * valuable information that will be used for analytics.
+	 *
+	 * @return	array
+	 */
+    public function update_workflow_for_analytics()
+    {
+    	$this->db->select('id');
+    	$query = $this->db->get('workflow');
+
+    	$workflows = array();
+
+    	foreach ($query->result() as $workflow) 
+    	{
+    		$attributions = array();
+
+    		$id_workflow = $workflow->id;
+
+    		// Construct dinamically a URL for each workflow
+    		$PARAMS = "id=".$id_workflow."&elements=uploader,attributions";
+    		$url = $this->WORKFLOW_URL."?".$PARAMS;
+
+    		// Request the content in XML format
+    		$context  = stream_context_create(
+    						array(
+    							'http' => array(
+    										'header' => 'Accept: application/xml'
+    										)
+    							)
+    						);
+
+			$xml = file_get_contents($url, false, $context);
+			$xml = simplexml_load_string($xml);
+
+			if(!empty($xml))
+			{
+				$id_author = $xml->uploader['id'];
+				$workflows/*[]*/ = array(
+										//'id' => $id_workflow,
+										'id_author' => $id_author,
+										'date_last_update' => date("Y-m-d H:i:s")
+									);
+
+				$this->db->where('id', $id_workflow);
+				$this->db->update('workflow', $workflows);
+
+				foreach ($xml->attributions->children() as $attribution) 
+				{
+					$attributions = array(
+										'id_workflow' => $id_workflow,
+										'id_subworkflow' => $attribution['id'],
+										'date' => date("Y-m-d H:i:s")
+									);
+
+					$this->db->insert('attribution', $attributions);
+				}
+			}
+		}
+
+		return array('status' => 'OK');
+    }
+
+    // --------------------------------------------------------------------
+
+    /**
 	 * Update Workflow Metadata in Database
 	 *
 	 * The workflow metadata is extracted from the API and stored in the 

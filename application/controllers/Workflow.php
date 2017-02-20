@@ -27,6 +27,15 @@ class Workflow extends CI_Controller {
 	         ->set_output(json_encode($response));
 	}
 
+	public function update_workflow_for_analytics()
+	{
+		$response = $this->workflow_model->update_workflow_for_analytics();
+
+		$this->output
+	         ->set_content_type('application/json')
+	         ->set_output(json_encode($response));
+	}
+
 	public function update_workflow_metadata()
 	{
 		$response = $this->workflow_model->update_workflow_metadata();
