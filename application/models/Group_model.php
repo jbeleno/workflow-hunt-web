@@ -152,7 +152,7 @@ class Group_model extends CI_Model {
     		$id_group = $group->id;
 
     		// Construct dinamically a URL for each workflow
-    		$PARAMS = "id=".$id_group."&elements=title,description,members";
+    		$PARAMS = "id=".$id_group."&elements=title,description,members,shared-items";
     		$url = $this->GROUP_URL."?".$PARAMS;
 
     		// Request the content in XML format
@@ -188,6 +188,19 @@ class Group_model extends CI_Model {
 									);
 
 					$this->db->insert('member', $arr_member);
+				}
+
+				foreach ($xml->{'shared-items'}->children() as $item) 
+				{
+					if($item->getName() == 'workflow'){
+						$arr_workflow = array(
+											'id_group' => $id_group,
+											'id_workflow' => $item['id'],
+											'date' => date("Y-m-d H:i:s")
+										);
+
+						$this->db->insert('shared_with_group', $arr_workflow);
+					}
 				}
 			}
 		}

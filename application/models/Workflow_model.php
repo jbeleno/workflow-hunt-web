@@ -212,8 +212,6 @@ class Workflow_model extends CI_Model {
     	$this->db->select('id');
     	$query = $this->db->get('workflow');
 
-    	$workflows = array();
-
     	foreach ($query->result() as $workflow) 
     	{
     		$attributions = array();
@@ -221,7 +219,7 @@ class Workflow_model extends CI_Model {
     		$id_workflow = $workflow->id;
 
     		// Construct dinamically a URL for each workflow
-    		$PARAMS = "id=".$id_workflow."&elements=uploader,attributions";
+    		$PARAMS = "id=".$id_workflow."&elements=uploader,credits,attributions";
     		$url = $this->WORKFLOW_URL."?".$PARAMS;
 
     		// Request the content in XML format
@@ -238,15 +236,35 @@ class Workflow_model extends CI_Model {
 
 			if(!empty($xml))
 			{
-				$id_author = $xml->uploader['id'];
-				$workflows/*[]*/ = array(
-										//'id' => $id_workflow,
-										'id_author' => $id_author,
-										'date_last_update' => date("Y-m-d H:i:s")
+				$id_uploader = $xml->uploader['id'];
+				foreach ($xml->credits->children() as $credit) 
+				{
+					$credits = array(
+										'id_workflow' => $id_workflow,
+										'date' => date("Y-m-d H:i:s")
 									);
+					if($credit->getName() == 'user'){
+						$credits['id_author'] =  $credit['id'];
+						$this->db->insert('credit', $credits);
+					}else if($credit->getName() == 'group'){
+						$credits['id_group'] =  $credit['id'];
+						$this->db->insert('credit_group', $credits);
+					}
+				}
 
-				$this->db->where('id', $id_workflow);
-				$this->db->update('workflow', $workflows);
+				// Check if the uploader is included in the credits
+				$this->db->where('id_author', $id_uploader);
+				$this->db->where('id_workflow', $id_workflow);
+				if($this->db->count_all_results('credit') == 0)
+				{
+					$credits = array(
+						'id_workflow' => $id_workflow,
+						'id_author' => $id_uploader,
+						'date' => date("Y-m-d H:i:s")
+					);
+
+					$this->db->insert('credit', $credits);
+				}
 
 				foreach ($xml->attributions->children() as $attribution) 
 				{
