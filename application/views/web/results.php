@@ -18,13 +18,13 @@
 <body>
 	<div class="container results-container">
 		<div class="row">
-			<div class="col-lg-2 col-xl-2 text-xs-center text-lg-right">
+			<div class="col-lg-1 col-xl-1 text-xs-center text-lg-right">
 				<a href="<?php print base_url();?>index.php/web/index">
 					<img src="<?php print base_url();?>assets/img/logo.png" class="results-logo">
 				</a>
 			</div>
 			<!-- .col-lg-2 .col-xl-2 .text-xs-center .text-lg-right -->
-			<div class="col-lg-10 col-xl-10">
+			<div class="col-lg-11 col-xl-11">
 				<form action="<?php print base_url();?>index.php/web/results/" method="GET">
 					<div class="input-group">
 						<input type="text" class="form-control results-input-search" name="query" value="<?php print $query; ?>">
@@ -64,7 +64,7 @@
 		<!-- .row -->
 		<hr>
 		<div class="row">
-			<div class="col-lg-10 col-xl-10 offset-lg-2 offset-xl-2">
+			<div class="col-lg-7 col-xl-7 offset-lg-1 offset-xl-1">
 				<?php 	
 					if($status == 'BAD')
 					{
@@ -115,9 +115,12 @@
 									?>
 									<div class="results-semantic-annotations">
 										<strong> Semantic annotations: </strong>
-										<a target="_blank" href="<?php print base_url().'index.php/web/workflow?id='.$workflow['_id']; ?>">
-											READ MORE		
-										</a>
+										<span>
+											<a target="_blank" href="<?php print base_url().'index.php/web/workflow?id='.$workflow['_id']; ?>">
+												READ MORE		
+											</a>
+											 - 
+											<span class="results-span-analytics">ANALYTICS</span>
 									</div>
 									<?php
 										}
@@ -143,6 +146,42 @@
 				?>
 			</div>
 			<!-- .col-lg-10 .col-xl-10 .offset-lg-2 .offset-xl-2-->
+			<div class="col-lg-4 col-xl-4">
+				<div class="results-analytic-box">
+					<div class="results-analytic-title">Workflows associated</div>
+					<div class="results-analytic-description">
+						These workflows were listed using the subworkflows that are contained in the workflow selected.
+					</div>
+					<ul class="results-analytic-list">
+						<li><a href="#">DNA Shuffling Template - part 1: DNaseI digestion</a></li>
+						<li><a href="#">Propagation of type II associated CME using SHEBA and solar wind properties from ACE</a></li>
+						<li><a href="#">DNA Shuffling Template - part 1: DNaseI digestion</a></li>
+					</ul>
+					<!-- .results-analytic-list -->
+				</div>
+				<!-- .results-analytic-box -->
+				<div class="results-analytic-box">
+					<div class="results-analytic-title">Authors</div>
+					<div class="results-analytic-author">
+						<img class="results-analytic-author-thumbnail" src="https://www.myexperiment.org/images/avatar.png?1202402239">
+						<div class="results-analytic-author-content">
+							<a href="https://www.myexperiment.org/users/59168">Marcos Ross</a>
+							<div>Email: m.roos [at] lumc.nl</div>
+							<div>Website: <a href="http://www.lumc.nl/con/6020/39898/909290026392525"> Here </a></div>
+						</div>
+					</div>
+					<div class="results-analytic-author">
+						<img class="results-analytic-author-thumbnail" src="https://www.myexperiment.org/images/avatar.png?1202402239">
+						<div class="results-analytic-author-content">
+							<a href="https://www.myexperiment.org/users/59168">Marcos Ross</a>
+							<div>Email: m.roos [at] lumc.nl</div>
+							<div>Website: <a href="http://www.lumc.nl/con/6020/39898/909290026392525"> Here </a></div>
+						</div>
+					</div>
+				</div>
+				<!-- .results-analytic-box -->
+			</div>
+			<!-- .col-lg-4 .col-xl-4-->
 		</div>
 	</div>
 </body>

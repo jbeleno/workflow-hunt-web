@@ -75,6 +75,52 @@ html, body {
     color: #757575;
 }
 
+.results-span-analytics{
+    color: #FC7A85;
+    cursor: pointer;
+}
+
+.results-analytic-box{
+    border: 1px solid #EBEBEB;
+    border-radius: 2px;
+    padding: 1.5rem 1rem;
+    margin-bottom: 1rem;
+    background: white;
+}
+
+.results-analytic-title{
+    color: #292929;
+    font-size: 1rem;
+}
+
+.results-analytic-description{
+    margin-top: 0.5rem;
+    color: #777777;
+    font-size: 0.85rem;
+}
+
+.results-analytic-list{
+    margin-top: 0.5rem;
+    font-size: 0.85rem;
+    padding-left: 1.2rem;
+    margin-bottom: 0;
+}
+
+.results-analytic-author{
+    color: #292929;
+    margin-top: 0.5rem;
+}
+
+.results-analytic-author-thumbnail{
+    width: 3.5rem;
+    height: 3.5rem;
+    float: right;
+}
+
+.results-analytic-author-content{
+    font-size: 0.85rem;
+}
+
 .page-item{
     position: relative;
     float: left;
