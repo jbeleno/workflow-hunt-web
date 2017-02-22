@@ -151,7 +151,7 @@ class Workflow_model extends CI_Model {
 	    	$this->db->or_where('`id` IN (SELECT `id_subworkflow` FROM `attribution` WHERE `id_workflow` = '.$id_workflow.')', NULL, FALSE);
 	    	$query_workflows = $this->db->get('workflow', 5, 0);
 
-	    	$this->db->select('id,name,email,website');
+	    	$this->db->select('id,name,email,website,photo');
 	    	$this->db->where('`id` IN (SELECT `id_author` FROM `credit` WHERE `id_workflow` = '.$id_workflow.')');
 	    	$query_authors = $this->db->get('author', 5, 0);
 

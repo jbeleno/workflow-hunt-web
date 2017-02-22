@@ -147,39 +147,7 @@
 			</div>
 			<!-- .col-lg-10 .col-xl-10 .offset-lg-2 .offset-xl-2-->
 			<div class="col-lg-4 col-xl-4" id="semantic-augmentation">
-				<div class="results-analytic-box">
-					<div class="results-analytic-title">Workflows associated</div>
-					<div class="results-analytic-description">
-						These workflows were listed because they are subworkflows of the selected workflow or they use the selected workflow as subworkflow.
-					</div>
-					<ul class="results-analytic-list">
-						<li><a href="#">DNA Shuffling Template - part 1: DNaseI digestion</a></li>
-						<li><a href="#">Propagation of type II associated CME using SHEBA and solar wind properties from ACE</a></li>
-						<li><a href="#">DNA Shuffling Template - part 1: DNaseI digestion</a></li>
-					</ul>
-					<!-- .results-analytic-list -->
-				</div>
-				<!-- .results-analytic-box -->
-				<div class="results-analytic-box">
-					<div class="results-analytic-title">Authors</div>
-					<div class="results-analytic-author">
-						<img class="results-analytic-author-thumbnail" src="https://www.myexperiment.org/images/avatar.png?1202402239">
-						<div class="results-analytic-author-content">
-							<a href="https://www.myexperiment.org/users/59168">Marcos Ross</a>
-							<div>Email: m.roos [at] lumc.nl</div>
-							<div>Website: <a href="http://www.lumc.nl/con/6020/39898/909290026392525"> Here </a></div>
-						</div>
-					</div>
-					<div class="results-analytic-author">
-						<img class="results-analytic-author-thumbnail" src="https://www.myexperiment.org/images/avatar.png?1202402239">
-						<div class="results-analytic-author-content">
-							<a href="https://www.myexperiment.org/users/59168">Marcos Ross</a>
-							<div>Email: m.roos [at] lumc.nl</div>
-							<div>Website: <a href="http://www.lumc.nl/con/6020/39898/909290026392525"> Here </a></div>
-						</div>
-					</div>
-				</div>
-				<!-- .results-analytic-box -->
+				
 			</div>
 			<!-- .col-lg-4 .col-xl-4-->
 		</div>
@@ -190,7 +158,71 @@
 
     <!-- Custom JavaScript -->
     <script type="text/javascript">
-    	function (){}
+    	var flag = true;
+
+    	function show_analytics(id_workflow)
+    	{
+    		if(flag)
+    		{
+    			flag = false;
+    			$.ajax({
+					method: "POST",
+					url: "<?php print base_url(); ?>index.php/workflow/get_semantic_augmentation",
+					context: document.body,
+					data: { 
+						id_workflow: id_workflow
+					},
+					success: function(result){
+						if(result.status == 'OK')
+						{
+							var content = "";
+							if(result.workflows.length > 0)
+							{
+								content += '<div class="results-analytic-box">';
+								content += '<div class="results-analytic-title">Workflows associated</div>';
+								content += '<div class="results-analytic-description">';
+								content += 'These workflows were listed because they are subworkflows of the selected workflow or they use the selected workflow as subworkflow.';
+								content += '</div>';
+								content += '<ul class="results-analytic-list">';
+								for (var i = 0; i < result.workflows.length; i++) 
+								{
+									content += '<li><a target="_blank" href="<?php print base_url().'index.php/web/workflow?id='; ?>'+result.workflows[i].id+'">'+result.workflows[i].title+'</a></li>';
+								}
+								content += '</ul>';
+								content += '</div>';
+							}
+
+							if(result.authors.length > 0)
+							{
+								content += '<div class="results-analytic-box">';
+								content += '<div class="results-analytic-title">Authors</div>';
+								for (var i = 0; i < result.authors.length; i++) 
+								{
+									content += '<div class="results-analytic-author">';
+									content += '<img class="results-analytic-author-thumbnail" src="'+result.authors[i].photo+'">';
+									content += '<div class="results-analytic-author-content">';
+									content += '<a href="https://www.myexperiment.org/users/59168">'+result.authors[i].name+'</a>';
+									if(result.authors[i].email)
+									{
+										content += '<div>Email: '+result.authors[i].email+'</div>';
+									}
+									if(result.authors[i].website)
+									{
+										content += '<div>Website: <a href="'+result.authors[i].website+'"> Here </a></div>';
+									}
+									content += '</div>';
+									content += '</div>';
+								}
+								content += '</div>';
+							}
+
+							$("#semantic-augmentation").html(content);
+						}
+						flag = true;
+		    		}
+		    	});
+    		}
+    	}
     </script>
 </body>
 </html>

@@ -20,7 +20,9 @@ class Workflow extends CI_Controller {
 
 	public function get_semantic_augmentation()
 	{
-		$response = $this->workflow_model->get_semantic_augmentation(16);
+		$id_workflow = $this->input->post('id_workflow');
+
+		$response = $this->workflow_model->get_semantic_augmentation($id_workflow);
 
 		$this->output
 	         ->set_content_type('application/json')

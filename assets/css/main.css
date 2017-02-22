@@ -108,7 +108,7 @@ html, body {
 
 .results-analytic-author{
     color: #292929;
-    margin-top: 0.5rem;
+    margin-top: 1rem;
 }
 
 .results-analytic-author-thumbnail{
@@ -119,6 +119,7 @@ html, body {
 
 .results-analytic-author-content{
     font-size: 0.85rem;
+    height: 3.5rem;
 }
 
 .page-item{
