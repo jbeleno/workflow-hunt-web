@@ -18,6 +18,15 @@ class Workflow extends CI_Controller {
 	         ->set_output(json_encode($response));
 	}
 
+	public function get_semantic_augmentation()
+	{
+		$response = $this->workflow_model->get_semantic_augmentation(16);
+
+		$this->output
+	         ->set_content_type('application/json')
+	         ->set_output(json_encode($response));
+	}
+
 	public function insert_workflow_metadata()
 	{
 		$response = $this->workflow_model->insert_workflow_ids(50);

@@ -104,7 +104,7 @@
 									</div>
 									<div class="results-workflow-description">
 
-										<?php print character_limiter($workflow['_source']['description'], 320);?>
+										<?php print character_limiter($workflow['_source']['description'], 150);?>
 									</div>
 									<div class="results-workflow-wfms">
 										Workflow Management System: <strong><?php print $workflow['_source']['wfms'];?></strong>
@@ -120,7 +120,7 @@
 												READ MORE		
 											</a>
 											 - 
-											<span class="results-span-analytics">ANALYTICS</span>
+											<span class="results-span-analytics" onclick="show_analytics(<?php print $workflow['_id'];?>)">ANALYTICS</span>
 									</div>
 									<?php
 										}
@@ -146,11 +146,11 @@
 				?>
 			</div>
 			<!-- .col-lg-10 .col-xl-10 .offset-lg-2 .offset-xl-2-->
-			<div class="col-lg-4 col-xl-4">
+			<div class="col-lg-4 col-xl-4" id="semantic-augmentation">
 				<div class="results-analytic-box">
 					<div class="results-analytic-title">Workflows associated</div>
 					<div class="results-analytic-description">
-						These workflows were listed using the subworkflows that are contained in the workflow selected.
+						These workflows were listed because they are subworkflows of the selected workflow or they use the selected workflow as subworkflow.
 					</div>
 					<ul class="results-analytic-list">
 						<li><a href="#">DNA Shuffling Template - part 1: DNaseI digestion</a></li>
@@ -184,5 +184,13 @@
 			<!-- .col-lg-4 .col-xl-4-->
 		</div>
 	</div>
+
+	<!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+
+    <!-- Custom JavaScript -->
+    <script type="text/javascript">
+    	function (){}
+    </script>
 </body>
 </html>

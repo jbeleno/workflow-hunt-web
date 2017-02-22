@@ -138,6 +138,36 @@ class Workflow_model extends CI_Model {
     // --------------------------------------------------------------------
 
     /**
+	 * Get Related Workflows Based On Subworkflows
+	 *
+	 * @param	int	$id_workflow	Workflow Identificator
+	 * @return	array
+	 */
+    public function get_semantic_augmentation($id_workflow)
+    {
+    	if(is_numeric($id_workflow)){
+	    	$this->db->select('id,title');
+	    	$this->db->where('`id` IN (SELECT `id_workflow` FROM `attribution` WHERE `id_subworkflow` = '.$id_workflow.')', NULL, FALSE);
+	    	$this->db->or_where('`id` IN (SELECT `id_subworkflow` FROM `attribution` WHERE `id_workflow` = '.$id_workflow.')', NULL, FALSE);
+	    	$query_workflows = $this->db->get('workflow', 5, 0);
+
+	    	$this->db->select('id,name,email,website');
+	    	$this->db->where('`id` IN (SELECT `id_author` FROM `credit` WHERE `id_workflow` = '.$id_workflow.')');
+	    	$query_authors = $this->db->get('author', 5, 0);
+
+	    	return array(
+	    				'status' => 'OK', 
+	    				'workflows' => $query_workflows->result(), 
+	    				'authors' => $query_authors->result()
+	    				);
+	    }
+
+    	return array('status' => 'BAD', 'msg' => 'The identifier provided is not numeric.');
+    }
+
+    // --------------------------------------------------------------------
+
+    /**
 	 * Insert Workflow Identifiers in Database
 	 *
 	 * @param	int	$wf_per_page	Number of workflows per page in the API
