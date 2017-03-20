@@ -181,7 +181,7 @@
 								content += '<div class="results-analytic-box">';
 								content += '<div class="results-analytic-title">Workflows associated</div>';
 								content += '<div class="results-analytic-description">';
-								content += 'These workflows were listed because they are subworkflows of the selected workflow or they use the selected workflow as subworkflow.';
+								content += 'These workflows were listed here because they are subworkflows of the selected workflow or they use the selected workflow as subworkflow.';
 								content += '</div>';
 								content += '<ul class="results-analytic-list">';
 								for (var i = 0; i < result.workflows.length; i++) 
