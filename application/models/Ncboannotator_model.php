@@ -54,7 +54,7 @@ class NCBOAnnotator_model extends CI_Model {
 	 *
 	 * @var	string
 	 */
-	private $ANNOTATOR_URL = "http://www.ebi.ac.uk/ols/api/ontologies/";
+	private $ANNOTATOR_URL = "http://data.bioontology.org/annotator?";
 
 	// --------------------------------------------------------------------
 
@@ -93,7 +93,7 @@ class NCBOAnnotator_model extends CI_Model {
     	}
 
     	// Remove the extra comma
-    	$ontologies = substr($ontologies, 0, len($ontologies) - 1);
+    	$ontologies = substr($ontologies, 0, strlen($ontologies) - 1);
 
     	$this->db->select('id,title,description');
    		$query_workflow = $this->db->get('workflow');
@@ -122,7 +122,7 @@ class NCBOAnnotator_model extends CI_Model {
 	    						array(
 	    							'ontologies' => $ontologies,
 	    							'text' => $free_text,
-	    							'apyKey' => NCBO_ANNOTATOR_API_KEY,
+	    							'apikey' => NCBO_ANNOTATOR_API_KEY,
 	    							'longest_only' => true
 	    						)
 	    					);
@@ -136,34 +136,39 @@ class NCBOAnnotator_model extends CI_Model {
 								)
 							);
 
-			$raw_content = file_get_contents($ANNOTATOR_URL.$PARAMETERS, false, $CONTEXT);
+			$raw_content = file_get_contents($this->ANNOTATOR_URL.$PARAMETERS, false, $CONTEXT);
 			$annotations = json_decode($raw_content);
-			$data = array();
+			//$data = array();
 
 			foreach ($annotations as $annotation) {
 
+				print_r($annotation);
+				print("<br><br>");
+
 				$this->db->select('id');
-				$this->db->where('iri', $annotation->annotatedClass->id);
+				$this->db->where('iri', $annotation->annotatedClass->{'@id'});
 				$query_term = $this->db->get('term', 1, 0);
 				$term = $query_term->row();
 
 				if($term != null) {
-					$data[] = array(
+					$data = array(
 						'id_workflow' => $workflow->id,
 						'id_term' => $term->id,
 						'source' => 'NCBO Annotator',
 						'created_at' => date("Y-m-d H:i:s")
 					);
+
+					// Insert the semantic annotations
+					$this->db->insert('ncbo_annotation', $data);
 				}
-
-
 			}
 
 			// Insert the semantic annotations
-			$this->db->insert_batch('ncbo_annotation', $data);
+			//$this->db->insert_batch('ncbo_annotation', $data);
 
     	}
 
+    	return array('status' => 'OK');
     }
 
 }
