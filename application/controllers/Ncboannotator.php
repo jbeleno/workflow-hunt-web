@@ -11,7 +11,7 @@ class Ncboannotator extends CI_Controller {
 
 	public function annotate()
 	{
-		$response = $this->ncboannotator_model->annotate();
+		$response = $this->ncboannotator_model->annotate_metadata();
 
 		$this->output
 	         ->set_content_type('application/json')

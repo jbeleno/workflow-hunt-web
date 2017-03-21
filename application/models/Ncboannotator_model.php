@@ -72,7 +72,65 @@ class NCBOAnnotator_model extends CI_Model {
     // --------------------------------------------------------------------
 
     /**
-	 * Annotates the free text provided with the ontologies in the parameters
+	 * Annotates the individual metadata
+	 *
+	 * Takes a free text from a metadata field that belongs to a workflow
+	 * and annotates it using NCBO Annotator.
+	 */
+    private function annotate( $metadata_id, $metadata_name, $metadata_value, 
+    							$ontologies, $id_workflow) {
+
+		$PARAMETERS = 	http_build_query(
+    						array(
+    							'ontologies' => $ontologies,
+    							'text' => $metadata_value,
+    							'apikey' => NCBO_ANNOTATOR_API_KEY,
+    							'longest_only' => true
+    						)
+    					);
+
+    	// Request the content in JSON format
+		$CONTEXT  = stream_context_create(
+						array(
+							'http' => array(
+										'header' => 'Accept: application/json'
+										)
+							)
+						);
+
+		$raw_content = file_get_contents($this->ANNOTATOR_URL.$PARAMETERS, false, $CONTEXT);
+		$annotations = json_decode($raw_content);
+		//$data = array();
+
+		foreach ($annotations as $annotation) {
+
+			$this->db->select('id');
+			$this->db->where('iri', $annotation->annotatedClass->{'@id'});
+			$query_term = $this->db->get('term', 1, 0);
+			$term = $query_term->row();
+
+			if($term != null) {
+				$data = array(
+					'id_workflow' => $id_workflow,
+					'id_term' => $term->id,
+					'source' => 'NCBO Annotator',
+					'from' => $annotation->annotations[0]->from,
+					'to' => $annotation->annotations[0]->to,
+					'metadata_type' => $metadata_name,
+					'id_metadata' => $metadata_id,
+					'created_at' => date("Y-m-d H:i:s")
+				);
+
+				// Insert the semantic annotations
+				$this->db->insert('ncbo_annotation', $data);
+			}
+		}
+    }
+
+    // --------------------------------------------------------------------
+
+    /**
+	 * Annotates the workflow metadata
 	 *
 	 * Iterates over the ontologies to get the prefix that will be used to 
 	 * annotate and takes as parameter the text to be annotated. This is just
@@ -81,7 +139,7 @@ class NCBOAnnotator_model extends CI_Model {
 	 *
 	 * @return	array
 	 */
-    public function annotate()
+    public function annotate_metadata()
     {
     	$this->db->select('prefix');
     	$query_ont = $this->db->get('ontology');
@@ -100,72 +158,68 @@ class NCBOAnnotator_model extends CI_Model {
 
     	foreach ($query_workflow->result() as $workflow) {
     		
-    		$this->db->select('tag.name AS name');
+    		$this->db->select('tag.id AS id, tag.name AS name');
     		$this->db->where('tag_wf.workflow_id', $workflow->id);
     		$this->db->from('tag');
     		$this->db->join('tag_wf', 'tag_wf.tag_id = tag.id');
     		$query_tags = $this->db->get();
-    		$tags = "";
+    		$tags = array();
 
     		foreach ($query_tags->result() as $tag) {
-    			$tags = $tag->name." - ";
+    			$tags[] = array($tag->id => $tag->name);
     		}
 
     		$title = $workflow->title;
     		$description = $workflow->description;
 
-    		// Merging the metadata
-    		$free_text = $title."\n".$description."\n".$tags;
+    		$metadata = array(
+    						'title' => $title,
+    						'description' => $description,
+    						'tags' => $tags
+    					);
 
+    		foreach ($metadata as $key => $value) {
+    			if(is_array($value)) {
+    				// This is the case of the tags and the internal foreach just
+    				// has one iteration
+    				foreach ($value as $val) {
+    					foreach ($val as $key2 => $value2) {
+    						$this->annotate( $key2, $key, $value2, $ontologies, $workflow->id);
+    					}
+    				}
 
-    		$PARAMETERS = 	http_build_query(
-	    						array(
-	    							'ontologies' => $ontologies,
-	    							'text' => $free_text,
-	    							'apikey' => NCBO_ANNOTATOR_API_KEY,
-	    							'longest_only' => true
-	    						)
-	    					);
+    			}else{
+    				$this->annotate( null, $key, $value, $ontologies, $workflow->id);
+    			}
+    		}
 
-	    	// Request the content in JSON format
-			$CONTEXT  = stream_context_create(
-							array(
-								'http' => array(
-											'header' => 'Accept: application/json'
-											)
-								)
-							);
+    	}
 
-			$raw_content = file_get_contents($this->ANNOTATOR_URL.$PARAMETERS, false, $CONTEXT);
-			$annotations = json_decode($raw_content);
-			//$data = array();
+    	return array('status' => 'OK');
+    }
 
-			foreach ($annotations as $annotation) {
+    // --------------------------------------------------------------------
 
-				print_r($annotation);
-				print("<br><br>");
+    /**
+	 * Semantic reinforcement
+	 *
+	 * In this case, we extends the annotations using synonyms that are not 
+	 * present in the default NCBO Annotator. Nevertheless, this can be 
+	 * extended to cover generalization and specialization. Semantic 
+	 * Reinforcement is done after the semantic annotations were done.
+	 *
+	 * @return	array
+	 */
+    public function reinforcement()
+    {
+    	$this->db->select('id_term,name');
+    	$this->db->where('source', 'WordNet');
+    	$query_synonyms = $this->db->get('synonym');
 
-				$this->db->select('id');
-				$this->db->where('iri', $annotation->annotatedClass->{'@id'});
-				$query_term = $this->db->get('term', 1, 0);
-				$term = $query_term->row();
-
-				if($term != null) {
-					$data = array(
-						'id_workflow' => $workflow->id,
-						'id_term' => $term->id,
-						'source' => 'NCBO Annotator',
-						'created_at' => date("Y-m-d H:i:s")
-					);
-
-					// Insert the semantic annotations
-					$this->db->insert('ncbo_annotation', $data);
-				}
-			}
-
-			// Insert the semantic annotations
-			//$this->db->insert_batch('ncbo_annotation', $data);
-
+    	foreach ($query_synonyms->result() as $synonym) {
+    		foreach ($variable as $key => $value) {
+    			# code...
+    		}
     	}
 
     	return array('status' => 'OK');
