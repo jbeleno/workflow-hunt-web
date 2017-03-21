@@ -114,8 +114,8 @@ class NCBOAnnotator_model extends CI_Model {
 					'id_workflow' => $id_workflow,
 					'id_term' => $term->id,
 					'source' => 'NCBO Annotator',
-					'from' => $annotation->annotations[0]->from,
-					'to' => $annotation->annotations[0]->to,
+					'from' => intval($annotation->annotations[0]->from) - 1,
+					'to' => intval($annotation->annotations[0]->to),
 					'metadata_type' => $metadata_name,
 					'id_metadata' => $metadata_id,
 					'created_at' => date("Y-m-d H:i:s")
