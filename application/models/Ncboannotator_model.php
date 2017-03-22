@@ -54,7 +54,7 @@ class NCBOAnnotator_model extends CI_Model {
 	 *
 	 * @var	string
 	 */
-	private $ANNOTATOR_URL = "http://data.bioontology.org/annotator?";
+	private $ANNOTATOR_URL = "http://data.bioontology.org/annotator";
 
 	// --------------------------------------------------------------------
 
@@ -80,6 +80,9 @@ class NCBOAnnotator_model extends CI_Model {
     private function annotate( $metadata_id, $metadata_name, $metadata_value, 
     							$ontologies, $id_workflow) {
 
+    	if ($metadata_value == null)
+    		return;
+
 		$PARAMETERS = 	http_build_query(
     						array(
     							'ontologies' => $ontologies,
@@ -93,12 +96,15 @@ class NCBOAnnotator_model extends CI_Model {
 		$CONTEXT  = stream_context_create(
 						array(
 							'http' => array(
-										'header' => 'Accept: application/json'
+                                        'method' => 'POST',
+										'header' => 'Accept: application/json',
+                                        'content' => $PARAMETERS
 										)
 							)
 						);
 
-		$raw_content = file_get_contents($this->ANNOTATOR_URL.$PARAMETERS, false, $CONTEXT);
+        // I had to use POST due to error HTTP 414
+		$raw_content = file_get_contents($this->ANNOTATOR_URL, false, $CONTEXT);
 		$annotations = json_decode($raw_content);
 		//$data = array();
 
@@ -154,6 +160,7 @@ class NCBOAnnotator_model extends CI_Model {
     	$ontologies = substr($ontologies, 0, strlen($ontologies) - 1);
 
     	$this->db->select('id,title,description');
+    	//$this->db->where('id >', 4384);
    		$query_workflow = $this->db->get('workflow');
 
     	foreach ($query_workflow->result() as $workflow) {
